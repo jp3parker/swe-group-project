@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Ascii-Images Homepage</title>
+</head>
+<body>
+    <div style="display: grid; place-items: center;">
+        {% for url in image_search_results %}
+            <img width="20%" src={{ url }}>
+        {% endfor %}
+        <br>
+
+        <form action="{{ url_for('fileUpload') }}" method="post" enctype="multipart/form-data">
+            <input type="submit">
+            <label for="file">Upload a File!</label>
+            <input type="file" id="file" name="file" accept="image/jpg,image/png,image/jpeg">
+        </form>
+        <p>OR</p> 
+        <form action="{{ url_for('imageSearch') }}" method="post">
+            <input type="submit">
+            <label for="searchWord">Search for images!</label>
+            <input type="text" id="searchWord" name="searchWord">
+        </form>
+    </div>
+</body>
+</html>
