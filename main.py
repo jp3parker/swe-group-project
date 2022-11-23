@@ -5,7 +5,6 @@ import requests
 from io import BytesIO
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, render_template, redirect, url_for, request
-from google_images_search import GoogleImagesSearch
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -18,7 +17,6 @@ from flask_sqlalchemy import SQLAlchemy
 load_dotenv(find_dotenv())
 GCS_DEVELOPER_KEY=os.getenv("GCS_DEVELOPER_KEY")
 GCS_CX=os.getenv("GCS_CX")
-gis = GoogleImagesSearch(GCS_DEVELOPER_KEY, GCS_CX)
 app = Flask(__name__)
 image_search_results = ["", "", ""] # placeholders
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
@@ -29,10 +27,13 @@ login_manager.init_app(app)
 # ascii characters used to build the output text
 ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", " "]
 
-_search_params = {
-    'q': '...',
-    'num': 3,
-    'fileType': 'jpg|png',
+GOOGLE_CUSTOM_SEARCH_URL="https://www.googleapis.com/customsearch/v1"
+search_params = {
+    'key': GCS_DEVELOPER_KEY,
+    'cx': GCS_CX,
+    'q': '...', # place holder
+    'searchType': 'image',
+    'num': 3
 }
 
 
@@ -139,18 +140,14 @@ def imageSearch():
         request.method == "POST"
         and "searchWord" in request.form
     ):
-        _search_params['q'] = str(request.form['searchWord'])
-        gis.search(search_params=_search_params)
-        results = gis.results()
-        print(image_search_results[0])
-        print(image_search_results[1])
-        print(image_search_results[2])
-        image_search_results[0] = results[0].url
-        image_search_results[1] = results[1].url
-        image_search_results[2] = results[2].url
-        print(image_search_results[0])
-        print(image_search_results[1])
-        print(image_search_results[2])
+        search_params['q'] = str(request.form['searchWord'])
+        response = requests.get(
+            GOOGLE_CUSTOM_SEARCH_URL,
+            params = search_params
+        ).json()
+        image_search_results[0] = response["items"][0]['link']
+        image_search_results[1] = response["items"][1]['link']
+        image_search_results[2] = response["items"][2]['link']
         return index(True)
     else:
         # flash("We could not process your comment.")
