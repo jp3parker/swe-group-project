@@ -123,8 +123,8 @@ def signup():
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def index(show_searched_images =False):
-
     pictures = Picture.query.filter_by(username=current_user.username)
+
     for pic in pictures:
         pic.picture.replace("\n", "<br>")
 
@@ -211,6 +211,10 @@ def fileUpload():
         ascii_image = "\n".join([new_image_data[index:(index+new_width)] \
             for index in range(0, pixel_count, new_width)])
         print(ascii_image)
+
+        new_picture = Picture(current_user.username, ascii_image, new_width)
+        db.session.add(new_picture)
+        db.session.commit()
 
         # save result to "ascii_image.txt"
         with open("ascii_image.txt", "w") as f:
