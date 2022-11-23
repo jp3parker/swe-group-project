@@ -5,11 +5,29 @@
     <title>Your Ascii-Images Homepage</title>
 </head>
 <body>
+
     <div style="display: grid; place-items: center;">
-        {% for url in image_search_results %}
-            <img width="20%" src={{ url }}>
-        {% endfor %}
-        <br>
+        {% if image_search_results|length > 0 %}
+            <form action="{{ url_for('ChooseSearchedImage') }}" method="post">
+                <input type="radio" id="image1" name="image" value="image1">
+                <label for="image1">
+                    <img width="20%" src="{{ image_search_results[0] }}"/>
+                </label>
+
+                <input type="radio" id="image2" name="image" value="image2">
+                <label for="image2">
+                    <img width="20%" src="{{ image_search_results[1] }}"/>
+                </label>
+
+                <input type="radio" id="image3" name="image" value="image3">
+                <label for="image3">
+                    <img width="20%" src="{{ image_search_results[2] }}"/>
+                </label>
+
+                <input type="submit">
+            </form>
+            <br>
+        {% endif %}
 
         <form action="{{ url_for('fileUpload') }}" method="post" enctype="multipart/form-data">
             <input type="submit">
@@ -22,6 +40,13 @@
             <label for="searchWord">Search for images!</label>
             <input type="text" id="searchWord" name="searchWord">
         </form>
+        <br>
+
+        {% for picture in pictures %}
+        <pre>{{picture.picture}}</pre>
+        <br>
+        {% endfor %}
+
     </div>
 </body>
 </html>
