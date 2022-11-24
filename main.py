@@ -52,7 +52,7 @@ class Picture(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
-    picture = db.Column(db.String(10500), nullable=False)
+    picture = db.Column(db.String(21000), nullable=False)
     width = db.Column(db.Integer, nullable=False)
 
     def __init__(self, username, picture, width):
@@ -159,7 +159,7 @@ def ChooseSearchedImage():
         response = requests.get(url)
         image = Image.open(BytesIO(response.content))
         new_width = image.width
-        while (image.height * image.width > 10000):
+        while (image.height * image.width > 20000):
             new_width = int(new_width * 0.9)
             image = resize_image(image, new_width)
 
