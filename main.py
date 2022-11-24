@@ -52,7 +52,7 @@ class Picture(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
-    picture = db.Column(db.String(10000), nullable=False)
+    picture = db.Column(db.String(10500), nullable=False)
     width = db.Column(db.Integer, nullable=False)
 
     def __init__(self, username, picture, width):
@@ -81,7 +81,6 @@ def login_page():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST" and "username" in request.form:  # logging in
-        print("valid")
         name = request.form["username"]
         user = Person.query.filter_by(username=name).first()
         if user:
@@ -102,20 +101,16 @@ def signup_page():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST" and "username" in request.form:  # signing up
-        print("trying to sign up.")
         name = request.form["username"]
         user = Person.query.filter_by(username=name).first()
         if user:
-            print("already have an account")
             return redirect(url_for("login_page"))
         else:
-            print("trying to insert new person")
             new_entry = Person(name)
             db.session.add(new_entry)
             db.session.commit()
             return redirect(url_for("login_page"))
     else:
-        print("something went wrong with signup.")
         return redirect(url_for("signup_page"))
 
 
@@ -172,33 +167,25 @@ def ChooseSearchedImage():
         pixel_count = len(new_image_data)
         ascii_image = "\n".join([new_image_data[index:(index+new_width)] \
             for index in range(0, pixel_count, new_width)])
-        print(ascii_image)
 
         new_picture = Picture(current_user.username, ascii_image, new_width)
         db.session.add(new_picture)
         db.session.commit()
 
         # save result to "ascii_image.txt"
-        with open("ascii_image.txt", "w") as f:
-            f.write(ascii_image)
-    else:
-        print("it failed")
-    print("got here 2!!!!!!!!!!!!!!!!!!")
+        # with open("ascii_image.html", "w") as f:
+        #     f.write(ascii_image)
+
     return redirect(url_for("index"))
 
 
 @app.route('/fileUpload', methods=["GET", "POST"])
 def fileUpload():
-    print(request.method)
-    print("file" in request.form)
-    print(request.files)
     if request.method == "POST" \
     and request.files:
-        print("valid")
         try:
             image = Image.open(request.files["file"])
         except:
-            print("is not a valid pathname to an image.")
             return index(False)
 
         new_width = image.width
@@ -210,17 +197,15 @@ def fileUpload():
         pixel_count = len(new_image_data)
         ascii_image = "\n".join([new_image_data[index:(index+new_width)] \
             for index in range(0, pixel_count, new_width)])
-        print(ascii_image)
 
         new_picture = Picture(current_user.username, ascii_image, new_width)
         db.session.add(new_picture)
         db.session.commit()
 
         # save result to "ascii_image.txt"
-        with open("ascii_image.txt", "w") as f:
-            f.write(ascii_image)
-    else:
-        print("not valid")
+        # with open("ascii_image.txt", "w") as f:
+        #     f.write(ascii_image)
+
     return index(False)
 
 
