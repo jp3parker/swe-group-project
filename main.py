@@ -158,6 +158,7 @@ def ChooseSearchedImage():
               image_search_results[2]
         response = requests.get(url)
         image = Image.open(BytesIO(response.content))
+        image = image.resize((image.width, int(3/4*image.height)))
         new_width = image.width
         while (image.height * image.width > 20000):
             new_width = int(new_width * 0.9)
@@ -187,7 +188,7 @@ def fileUpload():
             image = Image.open(request.files["file"])
         except:
             return index(False)
-
+        image = image.resize((image.width, int(3/4*image.height)))
         new_width = image.width
         while (image.height * image.width > 10000):
             new_width = int(new_width * 0.9)
