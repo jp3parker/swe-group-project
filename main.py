@@ -5,7 +5,6 @@ import requests
 from io import BytesIO
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, render_template, redirect, url_for, request
-from google_images_search import GoogleImagesSearch
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -18,7 +17,6 @@ from flask_sqlalchemy import SQLAlchemy
 load_dotenv(find_dotenv())
 GCS_DEVELOPER_KEY=os.getenv("GCS_DEVELOPER_KEY")
 GCS_CX=os.getenv("GCS_CX")
-gis = GoogleImagesSearch(GCS_DEVELOPER_KEY, GCS_CX)
 app = Flask(__name__)
 image_search_results = ["", "", ""] # placeholders
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
@@ -29,10 +27,13 @@ login_manager.init_app(app)
 # ascii characters used to build the output text
 ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", " "]
 
-_search_params = {
-    'q': '...',
-    'num': 3,
-    'fileType': 'jpg|png',
+GOOGLE_CUSTOM_SEARCH_URL="https://www.googleapis.com/customsearch/v1"
+search_params = {
+    'key': GCS_DEVELOPER_KEY,
+    'cx': GCS_CX,
+    'q': '...', # place holder
+    'searchType': 'image',
+    'num': 3
 }
 
 
@@ -51,7 +52,7 @@ class Picture(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), nullable=False)
-    picture = db.Column(db.String(10000), nullable=False)
+    picture = db.Column(db.String(21000), nullable=False)
     width = db.Column(db.Integer, nullable=False)
 
     def __init__(self, username, picture, width):
@@ -80,7 +81,6 @@ def login_page():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST" and "username" in request.form:  # logging in
-        print("valid")
         name = request.form["username"]
         user = Person.query.filter_by(username=name).first()
         if user:
@@ -101,20 +101,16 @@ def signup_page():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST" and "username" in request.form:  # signing up
-        print("trying to sign up.")
         name = request.form["username"]
         user = Person.query.filter_by(username=name).first()
         if user:
-            print("already have an account")
             return redirect(url_for("login_page"))
         else:
-            print("trying to insert new person")
             new_entry = Person(name)
             db.session.add(new_entry)
             db.session.commit()
             return redirect(url_for("login_page"))
     else:
-        print("something went wrong with signup.")
         return redirect(url_for("signup_page"))
 
 
@@ -122,8 +118,8 @@ def signup():
 @app.route("/home", methods=["GET", "POST"])
 @login_required
 def index(show_searched_images =False):
-
     pictures = Picture.query.filter_by(username=current_user.username)
+
     for pic in pictures:
         pic.picture.replace("\n", "<br>")
 
@@ -139,18 +135,14 @@ def imageSearch():
         request.method == "POST"
         and "searchWord" in request.form
     ):
-        _search_params['q'] = str(request.form['searchWord'])
-        gis.search(search_params=_search_params)
-        results = gis.results()
-        print(image_search_results[0])
-        print(image_search_results[1])
-        print(image_search_results[2])
-        image_search_results[0] = results[0].url
-        image_search_results[1] = results[1].url
-        image_search_results[2] = results[2].url
-        print(image_search_results[0])
-        print(image_search_results[1])
-        print(image_search_results[2])
+        search_params['q'] = str(request.form['searchWord'])
+        response = requests.get(
+            GOOGLE_CUSTOM_SEARCH_URL,
+            params = search_params
+        ).json()
+        image_search_results[0] = response["items"][0]['link']
+        image_search_results[1] = response["items"][1]['link']
+        image_search_results[2] = response["items"][2]['link']
         return index(True)
     else:
         # flash("We could not process your comment.")
@@ -166,8 +158,9 @@ def ChooseSearchedImage():
               image_search_results[2]
         response = requests.get(url)
         image = Image.open(BytesIO(response.content))
+        image = image.resize((image.width, int(3/4*image.height)))
         new_width = image.width
-        while (image.height * image.width > 10000):
+        while (image.height * image.width > 20000):
             new_width = int(new_width * 0.9)
             image = resize_image(image, new_width)
 
@@ -175,35 +168,27 @@ def ChooseSearchedImage():
         pixel_count = len(new_image_data)
         ascii_image = "\n".join([new_image_data[index:(index+new_width)] \
             for index in range(0, pixel_count, new_width)])
-        print(ascii_image)
 
         new_picture = Picture(current_user.username, ascii_image, new_width)
         db.session.add(new_picture)
         db.session.commit()
 
         # save result to "ascii_image.txt"
-        with open("ascii_image.txt", "w") as f:
-            f.write(ascii_image)
-    else:
-        print("it failed")
-    print("got here 2!!!!!!!!!!!!!!!!!!")
+        # with open("ascii_image.html", "w") as f:
+        #     f.write(ascii_image)
+
     return redirect(url_for("index"))
 
 
 @app.route('/fileUpload', methods=["GET", "POST"])
 def fileUpload():
-    print(request.method)
-    print("file" in request.form)
-    print(request.files)
     if request.method == "POST" \
     and request.files:
-        print("valid")
         try:
             image = Image.open(request.files["file"])
         except:
-            print("is not a valid pathname to an image.")
             return index(False)
-
+        image = image.resize((image.width, int(3/4*image.height)))
         new_width = image.width
         while (image.height * image.width > 10000):
             new_width = int(new_width * 0.9)
@@ -213,13 +198,15 @@ def fileUpload():
         pixel_count = len(new_image_data)
         ascii_image = "\n".join([new_image_data[index:(index+new_width)] \
             for index in range(0, pixel_count, new_width)])
-        print(ascii_image)
+
+        new_picture = Picture(current_user.username, ascii_image, new_width)
+        db.session.add(new_picture)
+        db.session.commit()
 
         # save result to "ascii_image.txt"
-        with open("ascii_image.txt", "w") as f:
-            f.write(ascii_image)
-    else:
-        print("not valid")
+        # with open("ascii_image.txt", "w") as f:
+        #     f.write(ascii_image)
+
     return index(False)
 
 
