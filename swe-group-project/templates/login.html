@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>login page</title>
+
+    <link rel="stylesheet" href="login_style.css">
+</head>
+<body>
+    <div style="display: grid; place-items: center;">
+        <h1>login page</h1>
+        <form method="post" action="{{ url_for('login') }}">
+            <label for="username">Username:</label><br>
+            <input type="text" id="username" name="username">
+            <input type="submit" value="Submit">
+        </form><br>
+        <a href="{{ url_for('signup_page') }}">Make a new account?</a><br><br>
+    </div>
+</body>
+</html>
