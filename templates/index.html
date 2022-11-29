@@ -8,7 +8,7 @@
 
     <div style="display: grid; place-items: center;">
         {% if image_search_results|length > 0 %}
-            <form action="{{ url_for('ChooseSearchedImage') }}" method="post">
+            <form action="{{ url_for('choose_searched_image') }}" method="post">
                 <input type="radio" id="image1" name="image" value="image1">
                 <label for="image1">
                     <img width="20%" src="{{ image_search_results[0] }}"/>
@@ -29,13 +29,13 @@
             <br>
         {% endif %}
 
-        <form action="{{ url_for('fileUpload') }}" method="post" enctype="multipart/form-data">
+        <form action="{{ url_for('file_upload') }}" method="post" enctype="multipart/form-data">
             <input type="submit">
             <label for="file">Upload a File!</label>
             <input type="file" id="file" name="file" accept="image/jpg,image/png,image/jpeg">
         </form>
         <p>OR</p> 
-        <form action="{{ url_for('imageSearch') }}" method="post">
+        <form action="{{ url_for('image_search') }}" method="post">
             <input type="submit">
             <label for="searchWord">Search for images!</label>
             <input type="text" id="searchWord" name="searchWord">
