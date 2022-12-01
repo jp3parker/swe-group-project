@@ -5,11 +5,9 @@
     <meta charset="UTF-8">
     <title>Signup for Movie Explorer</title>
 </head>
-<header>
-    <h1>Signup Page</h1>
-</header>
 <body>
     <div style="display: grid; place-items: center;">
+        <h1>Signup Page</h1>
         <form method="post" action="{{ url_for('signup') }}">
             <label for="username">Username:</label><br>
             <input type="text" id="username" name="username">
@@ -17,6 +15,7 @@
         </form><br>
         &nbsp;
         <a href="{{ url_for('login_page') }}">Already have an account?</a><br><br>
+        <img src="../static/signup_meme.jpg"/>
     </div>
 </body>
 </html>
