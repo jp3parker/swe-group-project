@@ -3,16 +3,19 @@
 <head>
     <link rel="stylesheet" href="login_style.css"> 
     <meta charset="UTF-8">
-    <title>login page</title>
+    <title>Login Page</title>
 </head>
+<header>
+    <h1>Login Page</h1>
+</header>
 <body>
     <div style="display: grid; place-items: center;">
-        <h1>login page</h1>
         <form method="post" action="{{ url_for('login') }}">
             <label for="username">Username:</label><br>
             <input type="text" id="username" name="username">
             <input type="submit" value="Submit">
         </form><br>
+        &nbsp;
         <a href="{{ url_for('signup_page') }}">Make a new account?</a><br><br>
     </div>
 </body>
