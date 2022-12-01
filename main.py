@@ -1,7 +1,7 @@
 """docstring"""
 import os
 from io import BytesIO
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 import requests
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, render_template, redirect, url_for, request
@@ -180,7 +180,10 @@ def choose_searched_image():
             else image_search_results[2]
         )
         response = requests.get(url, timeout=10)
-        image = Image.open(BytesIO(response.content))
+        try:
+            image = Image.open(BytesIO(response.content))
+        except UnidentifiedImageError:
+            return redirect(url_for("index"))
         image = image.resize((image.width, int(3 / 4 * image.height)))
         new_width = image.width
         while image.height * image.width > 20000:

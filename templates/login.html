@@ -5,11 +5,9 @@
     <meta charset="UTF-8">
     <title>Login Page</title>
 </head>
-<header>
-    <h1>Login Page</h1>
-</header>
 <body>
     <div style="display: grid; place-items: center;">
+        <h1>Login Page</h1>
         <form method="post" action="{{ url_for('login') }}">
             <label for="username">Username:</label><br>
             <input type="text" id="username" name="username">
@@ -17,6 +15,7 @@
         </form><br>
         &nbsp;
         <a href="{{ url_for('signup_page') }}">Make a new account?</a><br><br>
+        <img src="../static/login_meme.jpg"/>
     </div>
 </body>
 </html>
