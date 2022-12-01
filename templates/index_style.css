@@ -2,7 +2,7 @@ body {
     margin: 0;
     color: #6a6f8c;
     background: #2A3A66;
-    font: 600 16px/18px 'Open Sans', sans-serif;
+    font: 600 16px/18px 'Verdana', sans-serif;
 }
 
 *,
@@ -188,4 +188,24 @@ a {
 
 .foot-lnk {
     text-align: center;
+}
+
+/* Style the header */
+header {
+    background-color: #2A3A66;
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    color: white;
+  }
+
+  div {
+    padding-top: 50px;
+  
+    padding-bottom: 50px;
+    
+  }
+
+  label {
+    line-height: 1.75;
 }
